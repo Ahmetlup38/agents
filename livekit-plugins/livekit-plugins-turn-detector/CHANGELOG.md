@@ -1,5 +1,11 @@
 # livekit-plugins-eou
 
+## 0.4.1
+
+### Patch Changes
+
+- fix incorrect dtype on windows - [#1452](https://github.com/livekit/agents/pull/1452) ([@jeradf](https://github.com/jeradf))
+
 ## 0.4.0
 
 ### Minor Changes

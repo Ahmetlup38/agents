@@ -1,5 +1,11 @@
 # livekit-agents
 
+## 0.12.12
+
+### Patch Changes
+
+- fix agent transcription could not be disabled - [#1448](https://github.com/livekit/agents/pull/1448) ([@davidzhao](https://github.com/davidzhao))
+
 ## 0.12.11
 
 ### Patch Changes
