@@ -1,5 +1,11 @@
 # livekit-plugins-google
 
+## 0.10.3
+
+### Patch Changes
+
+- Update to support passing chirp_2 location for other STT credentials - [#1098](https://github.com/livekit/agents/pull/1098) ([@brightsparc](https://github.com/brightsparc))
+
 ## 0.10.2
 
 ### Patch Changes
