@@ -370,14 +370,17 @@ class AgentActivity(RecognitionHooks):
             if isinstance(self.llm, llm.LLM):
                 self.llm.on("metrics_collected", self._on_metrics_collected)
                 self.llm.on("error", self._on_error)
+                self.llm.prewarm()
 
             if isinstance(self.stt, stt.STT):
                 self.stt.on("metrics_collected", self._on_metrics_collected)
                 self.stt.on("error", self._on_error)
+                self.stt.prewarm()
 
             if isinstance(self.tts, tts.TTS):
                 self.tts.on("metrics_collected", self._on_metrics_collected)
                 self.tts.on("error", self._on_error)
+                self.tts.prewarm()
 
             if isinstance(self.vad, vad.VAD):
                 self.vad.on("metrics_collected", self._on_metrics_collected)
@@ -1268,18 +1271,20 @@ class AgentActivity(RecognitionHooks):
                 else:
                     forwarded_text = ""
 
-            msg = chat_ctx.add_message(
-                role="assistant",
-                content=forwarded_text,
-                id=llm_gen_data.id,
-                interrupted=True,
-                created_at=reply_started_at,
-            )
-            self._agent._chat_ctx.insert(msg)
+            if forwarded_text:
+                msg = chat_ctx.add_message(
+                    role="assistant",
+                    content=forwarded_text,
+                    id=llm_gen_data.id,
+                    interrupted=True,
+                    created_at=reply_started_at,
+                )
+                self._agent._chat_ctx.insert(msg)
+                self._session._conversation_item_added(msg)
+                speech_handle._set_chat_message(msg)
+
             if self._session.agent_state == "speaking":
                 self._session._update_agent_state("listening")
-            self._session._conversation_item_added(msg)
-            speech_handle._set_chat_message(msg)
             speech_handle._mark_playout_done()
             await utils.aio.cancel_and_wait(exe_task)
             return
@@ -1588,12 +1593,13 @@ class AgentActivity(RecognitionHooks):
                         message_id=msg_id, audio_end_ms=int(playback_position * 1000)
                     )
 
-                msg = llm.ChatMessage(
-                    role="assistant", content=[forwarded_text], id=msg_id, interrupted=True
-                )
-                self._agent._chat_ctx.items.append(msg)
-                speech_handle._set_chat_message(msg)
-                self._session._conversation_item_added(msg)
+                if forwarded_text:
+                    msg = llm.ChatMessage(
+                        role="assistant", content=[forwarded_text], id=msg_id, interrupted=True
+                    )
+                    self._agent._chat_ctx.items.append(msg)
+                    speech_handle._set_chat_message(msg)
+                    self._session._conversation_item_added(msg)
 
             speech_handle._mark_playout_done()
             await utils.aio.cancel_and_wait(exe_task)
